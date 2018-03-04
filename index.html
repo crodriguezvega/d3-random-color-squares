@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Random color squares</title>
+    <style>
+      body {
+        font-size: 0.8em;
+        font-family: Arial, Helvetica, sans-serif
+      }
+    </style>
+  </head>
+  <body>
+    Nr. of columns: <input type="text" name="columns" tabindex=1></input>
+    Nr. of rows: <input type="text" name="rows" tabindex=2></input>
+    Nr. of colors: <input type="text" name="colors" tabindex=3></input>
+    <button type="submit" id="button" tabindex=4>Color me!</button>
+    <div class="graph">
+    </div>
+    
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script>
+      function generateData(numberOfColumns, numberOfRows, numberOfColors) {
+        var data = [];
+        for (i = 0; i < numberOfRows; i++) {
+          var numbers = [];
+          for (j = 0; j < numberOfColumns; j++) {
+            numbers.push(Math.floor(Math.random() * numberOfColors) + 1);
+          }
+          data.push({ numbers: numbers });
+        }
+        return data;
+      }
+
+      function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+      }
+      
+      var button = document.getElementById('button');
+      button.onclick = function() {
+        button.disabled = true;
+        var numberOfColumns = parseInt(document.getElementsByName('columns')[0].value),
+            numberOfRows = parseInt(document.getElementsByName('rows')[0].value),
+            numberOfColors = parseInt(document.getElementsByName('colors')[0].value);
+
+        var h = 10;
+        var w = 10;
+        var data = generateData(numberOfColumns, numberOfRows, numberOfColors);
+
+        var margin = {top: 0, right: 0, bottom: 0, left: 0},
+            width = w * numberOfColumns,
+            height = w * numberOfRows;
+
+        d3.selectAll('svg').remove();
+        var svg = d3.select('.graph')
+                    .append('svg')
+                    .attr('width', width)
+                    .attr('height', height);
+                    
+        var rows = svg.selectAll('g')
+                      .data(data)
+                      .enter()
+                      .append('g')
+                      .attr('transform', function(row, index) {
+                        return 'translate(0,' + (index * h + 1) + ')';
+                      });
+
+        rows.selectAll('rect')
+            .data(function(row) { return row.numbers; })
+            .enter()
+            .append('rect')
+            .attr('fill', function(song) { 
+              return '#ccc';
+            })
+            .attr('x', function(number, index) { return index * w; })
+            .attr('width', w)
+            .attr('y', function(number) { return 0; })
+            .attr('height', h)
+            .attr('class', function(number) {
+              return 'number-' + number;
+            });        
+
+        for (var i = 0; i < numberOfColors; i++) {
+          var color = getRandomColor();
+          d3.selectAll('.number-' + i).attr('fill', color);
+        }
+
+        button.disabled = false;
+      };
+    </script>
+  </body>
+</html>
